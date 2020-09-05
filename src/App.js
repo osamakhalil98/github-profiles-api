@@ -35,32 +35,42 @@ export default class App extends Component {
       document.getElementById(
         "repos"
       ).innerHTML = `<b>${resData.public_repos}</b> Repos`;
-      let userRepos = await fetch(
-        `${GITHUBAPI}${this._inputElement.value}/repos`
-      );
-      console.log(userRepos);
-      try {
-        let userReposData = await userRepos.json();
-        let repoUrl = await fetch(
+      let reposNumber = resData.public_repos;
+      console.log(reposNumber);
+      if (reposNumber === 0) {
+        let zeroReposList = document.querySelector(".zero-repos");
+        zeroReposList.classList.add("active");
+      } else {
+        let zeroReposList = document.querySelector(".zero-repos");
+        zeroReposList.classList.remove("active");
+        let userRepos = await fetch(
           `${GITHUBAPI}${this._inputElement.value}/repos`
         );
-        let repoUrlData = await repoUrl.json();
-        console.log(repoUrlData);
-        repoUrlData.slice(0, 5).forEach((repo, idx) => {
-          let link = document.getElementById(`repos-${idx}`);
-          console.log(link);
-          link.href = repo.html_url;
-          link.style.color = "white";
-          link.target = "_blank";
-          link.style.textDecoration = "none";
-        });
-        userReposData.slice(0, 5).forEach((repo, idx) => {
-          document.getElementById(`start-repos-${idx}`).innerText = repo.name;
-        });
-      } catch (ex) {
-        window.location.reload();
-        console.log(ex);
+        console.log(userRepos);
+        try {
+          let userReposData = await userRepos.json();
+          let repoUrl = await fetch(
+            `${GITHUBAPI}${this._inputElement.value}/repos`
+          );
+          let repoUrlData = await repoUrl.json();
+          console.log(repoUrlData);
+          repoUrlData.slice(0, 5).forEach((repo, idx) => {
+            let link = document.getElementById(`repos-${idx}`);
+            console.log(link);
+            link.href = repo.html_url;
+            link.style.color = "white";
+            link.target = "_blank";
+            link.style.textDecoration = "none";
+          });
+          userReposData.slice(0, 5).forEach((repo, idx) => {
+            document.getElementById(`start-repos-${idx}`).innerText = repo.name;
+          });
+        } catch (ex) {
+          window.location.reload();
+          console.log(ex);
+        }
       }
+
       return resData;
     }
   }
@@ -91,14 +101,17 @@ export default class App extends Component {
     let repoUrl = await fetch(`${DEFAULTURL}/repos`);
     let repoUrlData = await repoUrl.json();
     console.log(repoUrlData);
-    repoUrlData.slice(0, 5).forEach((repo, idx) => {
-      let link = document.getElementById(`repos-${idx}`);
-      console.log(link);
-      link.href = repo.html_url;
-      link.style.color = "white";
-      link.target = "_blank";
-      link.style.textDecoration = "none";
-    });
+    repoUrlData
+      .slice(0, 5)
+      .sort((a, b) => b - a)
+      .forEach((repo, idx) => {
+        let link = document.getElementById(`repos-${idx}`);
+        console.log(link);
+        link.href = repo.html_url;
+        link.style.color = "white";
+        link.target = "_blank";
+        link.style.textDecoration = "none";
+      });
   }
   render() {
     return (
@@ -138,7 +151,7 @@ export default class App extends Component {
               </ul>
             </div>
             <div className="user-repos">
-              <ul>
+              <ul className="zero-repos">
                 <a id="repos-0">
                   <li id="start-repos-0">Repo1</li>
                 </a>
